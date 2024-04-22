@@ -13,7 +13,6 @@ import javax.annotation.PreDestroy;
 ////@Scope("prototype")
 //public class AlphaService {
 //    @Autowired
-//    private AlphaDao alphaDao;
 //
 //    public AlphaService(){
 //        System.out.println("实例化alphaService");
