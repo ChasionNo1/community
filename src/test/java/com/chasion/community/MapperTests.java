@@ -1,8 +1,10 @@
 package com.chasion.community;
 
 import com.chasion.community.dao.DiscussPostMapper;
+import com.chasion.community.dao.LoginTicketMapper;
 import com.chasion.community.dao.UserMapper;
 import com.chasion.community.entity.DiscussPost;
+import com.chasion.community.entity.LoginTicket;
 import com.chasion.community.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ public class MapperTests {
 
     @Autowired
     private DiscussPostMapper discussPostMapper;
+
+    @Autowired
+    private LoginTicketMapper loginTicketMapper;
 
     @Test
     public void testSelectById() {
@@ -76,6 +81,27 @@ public class MapperTests {
         for (DiscussPost discussPost : discussPosts) {
             System.out.println(discussPost);
         }
+    }
+
+
+    @Test
+    public void testLoginTicketMapper(){
+
+        // 测试添加
+//        LoginTicket loginTicket = new LoginTicket();
+//        loginTicket.setTicket("asadasgc");
+//        loginTicket.setStatus(1);
+//        loginTicket.setUserId(150);
+//        loginTicket.setExpired(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24));
+//        loginTicketMapper.insertLoginTicket(loginTicket);
+
+        // 测试查询
+        LoginTicket loginTicket1 = loginTicketMapper.selectLoginTicket("asadasgc");
+        System.out.println(loginTicket1);
+
+        // 测试修改
+        int i = loginTicketMapper.updateLoginTicket("asadasgc", 0);
+        System.out.println(i);
     }
 
 
