@@ -13,4 +13,6 @@ public interface CommunityConstant {
     // 记住我时 (7天）
     int REMEMBER_EXPIRATION_TIME = 3600 * 24 * 1000 * 7;
 
+    int ENTITY_TYPE_POST = 1;
+    int ENTITY_TYPE_COMMENT = 2;
 }

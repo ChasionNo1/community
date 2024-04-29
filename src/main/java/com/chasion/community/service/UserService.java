@@ -148,7 +148,8 @@ public class UserService  implements CommunityConstant {
                 // 登录成功，设置登录凭证
                 LoginTicket loginTicket = new LoginTicket();
                 loginTicket.setUserId(user.getId());
-                loginTicket.setStatus(1);
+                // 登录成功状态为0
+                loginTicket.setStatus(0);
                 loginTicket.setTicket(CommunityUtil.generateUUID());
                 loginTicket.setExpired(new Date(System.currentTimeMillis() + expired));
                 loginTicketMapper.insertLoginTicket(loginTicket);
@@ -162,5 +163,62 @@ public class UserService  implements CommunityConstant {
     // 退出登录
     public void logout(String ticket){
         loginTicketMapper.updateLoginTicket(ticket, 1);
+    }
+
+    // 查询登录凭证
+    public LoginTicket getLoginTicket(String ticket){
+        return loginTicketMapper.selectLoginTicket(ticket);
+    }
+
+    // 更新头像
+    public int updateHeader(int userId, String headerUrl){
+        return userMapper.updateHeader(userId, headerUrl);
+    }
+
+    /**
+     *   修改密码
+     *   前端输入：原始密码，新密码和确认密码
+     *   原始密码要和数据库中的密码进行校验
+     *
+     * */
+    public Map<String, Object> updatePassword(int userId, String oldPassword, String newPassword, String confirmPassword){
+//        System.out.println("oldPassword:"+oldPassword);
+//        System.out.println("newPassword:"+newPassword);
+//        System.out.println("confirmPassword:"+confirmPassword);
+        HashMap<String, Object> map = new HashMap<>();
+        // 对传入的参数进行校验
+        if (StringUtils.isBlank(oldPassword)){
+            map.put("oldPasswordMsg", "原始密码为空");
+            return map;
+        }else if (StringUtils.isBlank(newPassword)){
+            map.put("newPasswordMsg", "新密码为空");
+            return map;
+        }else if (StringUtils.isBlank(confirmPassword)){
+            map.put("confirmPasswordMsg", "确认密码为空");
+            return map;
+        }
+        if (oldPassword.length() < 8){
+            map.put("oldPasswordMsg", "密码长度小于8");
+            return map;
+        }
+        if (newPassword.length() < 8){
+            map.put("newPasswordMsg", "密码长度小于8");
+            return map;
+        }
+        // 根据id取用用户        ？用户校验，此时是登录状态，所以用户是存在的
+        User user = userMapper.selectById(userId);
+        // 取数据库中的用户密码
+        String password = user.getPassword();
+        oldPassword = CommunityUtil.Md5(oldPassword + user.getSalt());
+        if (password.equals(oldPassword)){
+            // 与用户输入原始密码一致，进行修改，这里一般都有验证码的要求
+            if (newPassword.equals(confirmPassword)){
+                userMapper.updatePassword(userId,CommunityUtil.Md5(newPassword + user.getSalt()));
+            }else {
+                map.put("confirmPasswordMsg", "两次密码输入不一致");
+            }
+
+        }
+        return map;
     }
 }

@@ -4,6 +4,7 @@ package com.chasion.community.controller;
 //import com.chasion.community.service.AlphaService;
 import com.chasion.community.util.CommunityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -168,7 +169,13 @@ public class AlphaController {
     }
 
 
-
-
+    // ajax示例
+    @RequestMapping(path = "/ajax", method = RequestMethod.POST)
+    @ResponseBody
+    public String testAjax(String name, int age){
+        System.out.println(name);
+        System.out.println(age);
+        return CommunityUtil.getJSONString(0, "操作成功");
+    }
 
 }

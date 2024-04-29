@@ -7,6 +7,10 @@
             id, user_id, title, content, type, status, create_time, comment_count, score
         </sql>
 
+    <sql id="insertFields">
+        user_id, title, content, type, status, create_time, comment_count, score
+    </sql>
+
 <!--    List<DiscussPost> selectDiscussPost(int userId, int offset, int limit);-->
     <select id="selectDiscussPost" resultType="DiscussPost">
         select <include refid="selectFields"></include>
@@ -27,5 +31,18 @@
         <if test="userId != 0">
             and user_id = #{userId}
         </if>
+    </select>
+
+<!--    int insertDiscussPost(DiscussPost discussPost);-->
+    <insert id="insertDiscussPost" parameterType="DiscussPost" useGeneratedKeys="true" keyProperty="id">
+        insert into discuss_post (<include refid="insertFields"></include>)
+        values (#{userId}, #{title},#{content},#{type},#{status},#{createTime},#{commentCount},#{score})
+    </insert>
+
+<!--    int selectDiscussPostById(@Param("id")int id);-->
+    <select id="selectDiscussPostById" resultType="discussPost">
+        select <include refid="selectFields"></include>
+            from discuss_post
+        where id = #{id}
     </select>
 </mapper>

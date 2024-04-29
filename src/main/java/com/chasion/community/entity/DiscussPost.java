@@ -2,6 +2,8 @@ package com.chasion.community.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class DiscussPost {
     private int id;
@@ -10,7 +12,7 @@ public class DiscussPost {
     private String content;
     private int type;
     private int status;
-    private Data createTime;
+    private Date createTime;
     private int commentCount;
     private double score;
 
