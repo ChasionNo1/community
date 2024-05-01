@@ -2,9 +2,11 @@ package com.chasion.community;
 
 import com.chasion.community.dao.DiscussPostMapper;
 import com.chasion.community.dao.LoginTicketMapper;
+import com.chasion.community.dao.MessageMapper;
 import com.chasion.community.dao.UserMapper;
 import com.chasion.community.entity.DiscussPost;
 import com.chasion.community.entity.LoginTicket;
+import com.chasion.community.entity.Message;
 import com.chasion.community.entity.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,9 @@ public class MapperTests {
 
     @Autowired
     private LoginTicketMapper loginTicketMapper;
+
+    @Autowired
+    private MessageMapper messageMapper;
 
     @Test
     public void testSelectById() {
@@ -103,6 +108,31 @@ public class MapperTests {
         int i = loginTicketMapper.updateLoginTicket("asadasgc", 0);
         System.out.println(i);
     }
+
+    @Test
+    public void testMessageMapper(){
+        List<Message> conversations = messageMapper.getConversations(111, 0, 10);
+        for (Message message :
+                conversations) {
+            System.out.println(message);
+        }
+
+        int conversationCount = messageMapper.getConversationCount(111);
+        System.out.println(conversationCount);
+
+        int letterCount = messageMapper.getLetterCount("111_112");
+        System.out.println(letterCount);
+
+        List<Message> letters = messageMapper.getLetters("111_112", 0, 10);
+        for (Message letter :
+                letters) {
+            System.out.println(letter);
+        }
+
+        System.out.println(messageMapper.getUnreadLetterCount(111, null));
+    }
+
+
 
 
 }
