@@ -5,18 +5,18 @@ import com.chasion.community.entity.Page;
 import com.chasion.community.entity.User;
 import com.chasion.community.service.MessageService;
 import com.chasion.community.service.UserService;
+import com.chasion.community.util.CommunityUtil;
 import com.chasion.community.util.HostHolder;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 public class MessageController {
@@ -31,7 +31,7 @@ public class MessageController {
 
     // 私信列表
     @RequestMapping(path = "/letter/list", method = RequestMethod.GET)
-    public String getLetterList(Model model, Page page){
+    public String getLetterList(Model model, Page page) {
         // 分页信息
         page.setLimit(5);
         User user = hostHolder.getUser();
@@ -68,7 +68,7 @@ public class MessageController {
     }
 
     @RequestMapping(path = "/letter/detail/{conversationId}", method = RequestMethod.GET)
-    public String getLetterDetail(Model model, Page page, @PathVariable("conversationId") String conversationId){
+    public String getLetterDetail(Model model, Page page, @PathVariable("conversationId") String conversationId) {
         //设置分页信息
         page.setPath("/letter/detail/" + conversationId);
         page.setLimit(5);
@@ -76,12 +76,13 @@ public class MessageController {
 
         // 对话内容的封装
         String[] ids = conversationId.split("_");
-        int targetId = hostHolder.getUser().getId() == Integer.parseInt(ids[0])  ? Integer.parseInt(ids[1]) : Integer.parseInt(ids[0]);
+        int targetId = hostHolder.getUser().getId() == Integer.parseInt(ids[0]) ? Integer.parseInt(ids[1]) : Integer.parseInt(ids[0]);
         model.addAttribute("target", userService.findUserById(targetId));
         List<Message> letters = messageService.getLetters(conversationId, page.getOffset(), page.getLimit());
+        messageService.readMessage(letters);
         List<Map<String, Object>> letterVoList = new ArrayList<>();
-        for (Message letter:
-             letters) {
+        for (Message letter :
+                letters) {
             HashMap<String, Object> map = new HashMap<>();
             // 放内容，放发送者的信息
             map.put("letter", letter);
@@ -92,6 +93,27 @@ public class MessageController {
 
         model.addAttribute("letters", letterVoList);
         return "/site/letter-detail";
+    }
+
+    @RequestMapping(path = "/letter/send", method = RequestMethod.POST)
+    @ResponseBody
+    public String sendLetter(String toName, String content) {
+        // 对方目标
+        User target = userService.getUserByName(toName);
+        if (target == null) {
+            return CommunityUtil.getJSONString(1, "用户不存在！");
+        }
+        // 构造消息
+        Message message = new Message();
+        message.setFromId(hostHolder.getUser().getId());
+        message.setToId(target.getId());
+        message.setContent(content);
+        String conversationId = message.getFromId() < message.getToId() ? message.getFromId() + "_" + message.getToId() : message.getToId() + "_" + message.getFromId();
+        message.setConversationId(conversationId);
+        message.setCreateTime(new Date());
+        message.setStatus(0);
+        messageService.addMessage(message);
+        return CommunityUtil.getJSONString(0);
     }
 
 }

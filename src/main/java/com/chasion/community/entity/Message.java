@@ -2,6 +2,8 @@ package com.chasion.community.entity;
 
 import lombok.Data;
 
+import java.util.Date;
+
 @Data
 public class Message {
     // 私信属性
@@ -15,5 +17,5 @@ public class Message {
     private String content;
     // 状态，0是正常，1是不正常
     private int status;
-    private Data createTime;
+    private Date createTime;
 }
