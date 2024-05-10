@@ -20,4 +20,10 @@ public interface CommentMapper {
     // 增加评论
     int insertComment(Comment comment);
 
+    // 查询某用户的评论帖子列表
+    List<Comment> selectCommentByUserId(@Param("entityType")int entityType, @Param("userId") int userId, @Param("offset") int offset, @Param("limit") int limit);
+
+    // 查询某用户评论的帖子列表
+    int selectCountByUserId(@Param("entityType")int entityType, @Param("userId") int userId);
+
 }

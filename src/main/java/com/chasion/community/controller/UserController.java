@@ -1,8 +1,12 @@
 package com.chasion.community.controller;
 
 import com.chasion.community.annotation.LoginRequired;
+import com.chasion.community.entity.Comment;
+import com.chasion.community.entity.DiscussPost;
+import com.chasion.community.entity.Page;
 import com.chasion.community.entity.User;
-import com.chasion.community.service.UserService;
+import com.chasion.community.service.*;
+import com.chasion.community.util.CommunityConstant;
 import com.chasion.community.util.CommunityUtil;
 import com.chasion.community.util.HostHolder;
 import org.apache.commons.lang3.StringUtils;
@@ -21,9 +25,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Controller
 public class UserController {
@@ -41,6 +43,18 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private CommentService commentService;
 
     // 响应设置页面
     @LoginRequired
@@ -141,5 +155,110 @@ public class UserController {
             return "/site/setting";
         }
     }
+
+    // 个人主页
+    @RequestMapping(path = "/user/profile/{userId}", method = RequestMethod.GET)
+    public String getProfile(Model model, @PathVariable int userId) {
+        // 需要传入，用户信息：头像、用户名、注册时间、关注了几个人、关注者、获得了多少赞
+        User user = userService.findUserById(userId);
+        model.addAttribute("user", user);
+        if (user == null){
+            throw new RuntimeException("该用户不存在");
+        }
+        int userLikeCount = likeService.getUserLikeCount(userId);
+        model.addAttribute("userLikeCount", userLikeCount);
+        // 关注数量
+        long followeeCount = followService.getFolloweeCount(userId, CommunityConstant.ENTITY_TYPE_USER);
+        model.addAttribute("followeeCount", followeeCount);
+
+        // 粉丝数量
+        long followerCount = followService.getFollowerCount(CommunityConstant.ENTITY_TYPE_USER, userId);
+        model.addAttribute("followerCount", followerCount);
+
+        // 是否关注
+        boolean followed = false;
+        if (hostHolder.getUser() != null){
+            followed = followService.isFollowed(hostHolder.getUser().getId(), CommunityConstant.ENTITY_TYPE_USER, userId);
+
+        }
+        model.addAttribute("followed", followed);
+
+
+        return "/site/profile";
+    }
+
+    /**
+     * 获取个人发布的帖子列表，支持分页
+     * 需要的信息有：
+     * 1、发布的帖子总数
+     * 2、每条帖子的标题和内容，获得的赞和发布时间
+     *
+     * */
+    @RequestMapping(path = "/user/discussPost/{userId}", method = RequestMethod.GET)
+    public String getMyPostList(Model model, @PathVariable("userId") int userId, Page page) {
+        User user = userService.findUserById(userId);
+        model.addAttribute("user", user);
+        // 设置分页信息
+        int discussPostRows = discussPostService.findDiscussPostRows(userId);
+        model.addAttribute("discussPostRows", discussPostRows);
+        page.setRows(discussPostRows);
+        page.setLimit(10);
+        page.setPath("/user/discussPost" + userId);
+        // 查找某人发布过的帖子
+        List<DiscussPost> postList = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit());
+        // 封装volist
+        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
+        if (!postList.isEmpty()){
+            for (DiscussPost post : postList){
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("id", post.getId());
+                map.put("title", post.getTitle());
+                map.put("content", post.getContent());
+                map.put("createTime", post.getCreateTime());
+                long likeCount = likeService.getEntityLikeCount(CommunityConstant.ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
+                list.add(map);
+            }
+        }
+        model.addAttribute("postList", list);
+
+        return "/site/my-post";
+    }
+
+    /**
+     * 回复列表：支持分页
+     * 需要的信息有：
+     * 回复的帖子总数
+     * 回复帖子的id，回复帖子的标题，回复的内容，回复的时间
+     *
+     *
+     * */
+    @RequestMapping(path = "/user/reply/{userId}", method = RequestMethod.GET)
+    public String getMyReplyList(Model model, @PathVariable("userId") int userId, Page page) {
+        User user = userService.findUserById(userId);
+        model.addAttribute("user", user);
+        page.setPath("/user/reply" + userId);
+        page.setLimit(10);
+        // 对帖子的评论
+        int commentCount = commentService.getCommentCountByUserId(CommunityConstant.ENTITY_TYPE_POST, userId);
+        model.addAttribute("commentCount", commentCount);
+        page.setRows(commentCount);
+        List<Comment> comments = commentService.getCommentsByUserId(CommunityConstant.ENTITY_TYPE_POST, userId, page.getOffset(), page.getLimit());
+        ArrayList<HashMap<String, Object>> list = new ArrayList<>();
+        if (!comments.isEmpty()){
+            for (Comment comment : comments){
+                HashMap<String, Object> map = new HashMap<>();
+                map.put("id", comment.getEntityId());
+                map.put("content", comment.getContent());
+                map.put("createTime", comment.getCreateTime());
+                DiscussPost post = discussPostService.findDiscussPostById(comment.getEntityId());
+                map.put("title", post.getTitle());
+                list.add(map);
+            }
+        }
+        model.addAttribute("commentList", list);
+        return "/site/my-reply";
+    }
+
 
 }

@@ -3,7 +3,9 @@ package com.chasion.community.controller;
 import com.chasion.community.entity.DiscussPost;
 import com.chasion.community.entity.Page;
 import com.chasion.community.service.DiscussPostService;
+import com.chasion.community.service.LikeService;
 import com.chasion.community.service.UserService;
+import com.chasion.community.util.CommunityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +26,9 @@ public class HomeController {
     @Autowired
     private DiscussPostService discussPostService;
 
+    @Autowired
+    private LikeService likeService;
+
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page){
@@ -40,6 +45,8 @@ public class HomeController {
                 HashMap<String, Object> map = new HashMap<>();
                 map.put("post", post);
                 map.put("user", userService.findUserById(post.getUserId()));
+                long likeCount = likeService.getEntityLikeCount(CommunityConstant.ENTITY_TYPE_POST, post.getId());
+                map.put("likeCount", likeCount);
                 discussPosts.add(map);
             }
         }

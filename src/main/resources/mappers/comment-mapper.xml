@@ -35,4 +35,23 @@
         insert into comment (<include refid="insertFields"></include>)
         values (#{userId}, #{entityType}, #{entityId}, #{targetId}, #{content}, #{status}, #{createTime})
     </insert>
+
+<!--    List<Comment> selectCommentByUserId(@Param("entityType")int entityType, @Param("userId") int userId, @Param("offset") int offset, @Param("limit") int limit);-->
+    <select id="selectCommentByUserId" resultType="Comment">
+        select <include refid="selectFields"></include>
+        from comment
+        where status = 0
+        and entity_type = #{entityType}
+        and user_id = #{userId}
+        order by create_time asc
+        limit #{offset}, #{limit}
+    </select>
+
+<!--    int selectCountByUserId(@Param("entityType")int entityType, @Param("userId") int userId);-->
+    <select id="selectCountByUserId" resultType="int">
+        select count(id) from comment
+        where status = 0
+          and entity_type = #{entityType}
+          and user_id = #{userId}
+    </select>
 </mapper>

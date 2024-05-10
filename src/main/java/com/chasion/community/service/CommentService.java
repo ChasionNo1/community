@@ -49,4 +49,13 @@ public class CommentService {
         }
         return rows;
     }
+
+    // 根据userId获取评论的列表和总数
+    public List<Comment> getCommentsByUserId(int entityType, int userId, int offset, int limit) {
+        return commentMapper.selectCommentByUserId(entityType, userId, offset, limit);
+    }
+
+    public int getCommentCountByUserId(int entityType, int userId) {
+        return commentMapper.selectCountByUserId(entityType, userId);
+    }
 }
