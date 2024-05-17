@@ -26,4 +26,6 @@ public interface CommentMapper {
     // 查询某用户评论的帖子列表
     int selectCountByUserId(@Param("entityType")int entityType, @Param("userId") int userId);
 
+    // 根据评论id查询
+    Comment selectCommentById(int id);
 }

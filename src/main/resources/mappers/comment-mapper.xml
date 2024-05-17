@@ -54,4 +54,10 @@
           and entity_type = #{entityType}
           and user_id = #{userId}
     </select>
+<!--    Comment selectCommentById(@Param("id")int id);-->
+    <select id="selectCommentById" resultType="Comment">
+        select <include refid="selectFields"></include>
+        from comment
+        where id = #{id}
+    </select>
 </mapper>

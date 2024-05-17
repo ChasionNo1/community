@@ -1,6 +1,5 @@
 package com.chasion.community.service;
 
-import com.chasion.community.dao.LoginTicketMapper;
 import com.chasion.community.dao.UserMapper;
 import com.chasion.community.entity.LoginTicket;
 import com.chasion.community.entity.User;
@@ -15,7 +14,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import sun.security.krb5.internal.Ticket;
 
 import java.util.Date;
 import java.util.HashMap;

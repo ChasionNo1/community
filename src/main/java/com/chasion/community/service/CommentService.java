@@ -58,4 +58,9 @@ public class CommentService {
     public int getCommentCountByUserId(int entityType, int userId) {
         return commentMapper.selectCountByUserId(entityType, userId);
     }
+
+    // 根据comment id 查询comment
+    public Comment getCommentById(int id) {
+        return commentMapper.selectCommentById(id);
+    }
 }

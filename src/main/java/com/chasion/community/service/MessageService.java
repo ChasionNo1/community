@@ -83,4 +83,20 @@ public class MessageService {
 //        }
 //        return ids;
 //    }
+
+    public Message getLastNotice(int userId, String topic){
+        return messageMapper.getLatestNotice(userId, topic);
+    }
+
+    public int getNoticeCount(int userId, String topic){
+        return messageMapper.getNoticeCount(userId, topic);
+    }
+
+    public int getUnreadNoticeCount(int userId, String topic){
+        return messageMapper.getUnreadNoticeCount(userId, topic);
+    }
+
+    public List<Message> getNotices(int userId, String topic, int offset, int limit){
+        return messageMapper.getNotices(userId, topic, offset, limit);
+    }
 }

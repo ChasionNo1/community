@@ -1,7 +1,9 @@
 package com.chasion.community.controller;
 
+import com.chasion.community.entity.Event;
 import com.chasion.community.entity.Page;
 import com.chasion.community.entity.User;
+import com.chasion.community.event.EventProducer;
 import com.chasion.community.service.FollowService;
 import com.chasion.community.service.UserService;
 import com.chasion.community.util.CommunityConstant;
@@ -19,7 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-public class FollowController {
+public class FollowController implements CommunityConstant{
 
     @Autowired
     private FollowService followService;
@@ -30,6 +32,9 @@ public class FollowController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
 
     @RequestMapping(path = "/follow", method = RequestMethod.POST)
     @ResponseBody
@@ -37,6 +42,14 @@ public class FollowController {
         User user = hostHolder.getUser();
         // 关注
         followService.follow(user.getId(), entityType, entityId);
+        // 触发关注事件
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+        eventProducer.fireEvent(event);
         return CommunityUtil.getJSONString(0, "已关注");
     }
 
