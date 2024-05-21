@@ -1,8 +1,12 @@
 package com.chasion.community.event;
 
 import com.alibaba.fastjson.JSONObject;
+import com.chasion.community.dao.DiscussPostMapper;
+import com.chasion.community.entity.DiscussPost;
 import com.chasion.community.entity.Event;
 import com.chasion.community.entity.Message;
+import com.chasion.community.service.DiscussPostService;
+import com.chasion.community.service.ElasticsearchService;
 import com.chasion.community.service.MessageService;
 import com.chasion.community.util.CommunityConstant;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -24,6 +28,12 @@ public class EventConsumer implements CommunityConstant {
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
+
+    @Autowired
+    private ElasticsearchService elasticsearchService;
 
 //    @Value("${spring.kafka.consumer.group-id}")
 //    private String groupId;
@@ -58,4 +68,28 @@ public class EventConsumer implements CommunityConstant {
         message.setContent(JSONObject.toJSONString(content));
         messageService.addMessage(message);
     }
+
+
+    // 消费发帖事件，将发布的帖子添加到es服务器中
+    @KafkaListener(topics = {TOPIC_PUBLISH}, groupId = "community-consumer-group")
+    public void handlePublishMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Received null record");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("Received format error");
+            return;
+        }
+
+        // 查询帖子
+        DiscussPost post = discussPostService.findDiscussPostById(event.getEntityId());
+        // 存到es服务器中
+        if (post != null) {
+            elasticsearchService.saveDiscussPost(post);
+        }
+
+    }
+
 }

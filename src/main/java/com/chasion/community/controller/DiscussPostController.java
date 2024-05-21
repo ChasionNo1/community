@@ -1,9 +1,7 @@
 package com.chasion.community.controller;
 
-import com.chasion.community.entity.Comment;
-import com.chasion.community.entity.DiscussPost;
-import com.chasion.community.entity.Page;
-import com.chasion.community.entity.User;
+import com.chasion.community.entity.*;
+import com.chasion.community.event.EventProducer;
 import com.chasion.community.service.CommentService;
 import com.chasion.community.service.DiscussPostService;
 import com.chasion.community.service.LikeService;
@@ -40,6 +38,9 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     // 增加帖子，返回json字符串
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
@@ -57,6 +58,15 @@ public class DiscussPostController implements CommunityConstant {
         discussPost.setContent(content);
         discussPost.setCreateTime(new Date());
         discussPostService.addDiscussPost(discussPost);
+
+        // 触发发帖事件，将新发布的帖子存到es服务器中
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(userId)
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityId(discussPost.getId());
+
+        eventProducer.fireEvent(event);
         return CommunityUtil.getJSONString(0, "发布成功");
 
     }
@@ -141,5 +151,10 @@ public class DiscussPostController implements CommunityConstant {
 
         return "/site/discuss-detail";
     }
+
+    /**
+     * 删除帖子的功能
+     *
+     * */
 
 }

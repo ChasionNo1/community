@@ -34,7 +34,7 @@ public class CommentController implements CommunityConstant {
     private DiscussPostService discussPostService;
 
     @RequestMapping(value = "/add/{discussPostId}", method = RequestMethod.POST)
-    public String addComment(@PathVariable("discussPostId") String discussPostId, Model model, Comment comment) {
+    public String addComment(@PathVariable("discussPostId") int discussPostId, Model model, Comment comment) {
         comment.setUserId(hostHolder.getUser().getId());
         comment.setStatus(0);
         comment.setCreateTime(new Date());
@@ -57,6 +57,15 @@ public class CommentController implements CommunityConstant {
         }
 
         eventProducer.fireEvent(event);
+        // 评论给帖子时触发
+        if (comment.getEntityType() == ENTITY_TYPE_POST){
+            event = new Event()
+                    .setTopic(TOPIC_PUBLISH)
+                    .setUserId(hostHolder.getUser().getId())
+                    .setEntityId(discussPostId)
+                    .setEntityType(ENTITY_TYPE_POST);
+            eventProducer.fireEvent(event);
+        }
 
         return "redirect:/discuss/" + discussPostId;
     }
