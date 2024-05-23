@@ -92,4 +92,19 @@ public class EventConsumer implements CommunityConstant {
 
     }
 
+    // 消费删除帖子事件，将贴子从es服务器中删除
+    @KafkaListener(topics = {TOPIC_DELETE}, groupId = "community-consumer-group")
+    public void handleDeleteMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Received null record");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("Received format error");
+            return;
+        }
+        elasticsearchService.deleteDiscussPost(event.getEntityId());
+    }
+
 }

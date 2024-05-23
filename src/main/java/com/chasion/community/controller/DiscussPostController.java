@@ -154,7 +154,57 @@ public class DiscussPostController implements CommunityConstant {
 
     /**
      * 删除帖子的功能
-     *
+     *  管理员才有的功能
      * */
+    @RequestMapping(path = "/delete", method = RequestMethod.POST)
+    @ResponseBody
+    public String setDelete(int id){
+        User user = hostHolder.getUser();
+        discussPostService.updateStatus(id, 2);
+        // 触发事件
+        Event event = new Event()
+                .setTopic(TOPIC_DELETE)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0);
+    }
+
+
+    // 置顶
+    // 0是普通，1是置顶
+    @RequestMapping(value = "/top", method = RequestMethod.POST)
+    @ResponseBody
+    public String setTop(int id) {
+        User user = hostHolder.getUser();
+        discussPostService.updateType(id, 1);
+        // 同步帖子数据到es中
+        // 触发事件
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0);
+    }
+
+    // 加精
+    // 0是正常， 1是精华，2是拉黑
+    @RequestMapping(path = "/wonderful", method = RequestMethod.POST)
+    @ResponseBody
+    public String setWonderful(int id) {
+        User user = hostHolder.getUser();
+        discussPostService.updateStatus(id, 1);
+        // 同步到es中
+        Event event = new Event()
+                .setTopic(TOPIC_PUBLISH)
+                .setUserId(user.getId())
+                .setEntityType(ENTITY_TYPE_POST)
+                .setEntityType(id);
+        eventProducer.fireEvent(event);
+        return CommunityUtil.getJSONString(0);
+    }
 
 }
