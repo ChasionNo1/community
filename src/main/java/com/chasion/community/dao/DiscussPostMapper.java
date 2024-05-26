@@ -10,7 +10,7 @@ import java.util.List;
 public interface DiscussPostMapper {
 
     // 分页查询
-    List<DiscussPost> selectDiscussPost(@Param("userId")int userId, @Param("offset")int offset, @Param("limit")int limit);
+    List<DiscussPost> selectDiscussPost(@Param("userId")int userId, @Param("offset")int offset, @Param("limit")int limit, @Param("orderMode") int orderMode);
 
     // 查询帖子总数
     // @Param注解用于给参数起别名
@@ -31,4 +31,7 @@ public interface DiscussPostMapper {
 
     // 更改帖子状态，删除
     int updateStatus(@Param("id")int id, @Param("status")int status);
+
+    // 更新帖子的分数
+    int updateDiscussPostScore(@Param("id")int id, @Param("score")double score);
 }

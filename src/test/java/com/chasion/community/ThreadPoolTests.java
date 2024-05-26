@@ -103,14 +103,14 @@ public class ThreadPoolTests {
         sleep(30000);
     }
 
-    // 5、spring普通线程池，使用注解的方式
-    @Test
-    public void testThreadPoolTaskExecutorSimple(){
-        for (int i = 0; i < 10; i++) {
-            alphaService.execute1();
-        }
-        sleep(10000);
-    }
+//    // 5、spring普通线程池，使用注解的方式
+//    @Test
+//    public void testThreadPoolTaskExecutorSimple(){
+//        for (int i = 0; i < 10; i++) {
+//            alphaService.execute1();
+//        }
+//        sleep(10000);
+//    }
 
     // 6、spring定时任务简化
     @Test

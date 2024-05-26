@@ -9,7 +9,9 @@ import com.chasion.community.service.UserService;
 import com.chasion.community.util.CommunityConstant;
 import com.chasion.community.util.CommunityUtil;
 import com.chasion.community.util.HostHolder;
+import com.chasion.community.util.RedisKeyUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +43,9 @@ public class DiscussPostController implements CommunityConstant {
     @Autowired
     private EventProducer eventProducer;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     // 增加帖子，返回json字符串
     @RequestMapping(value = "/add", method = RequestMethod.POST)
     @ResponseBody
@@ -67,6 +72,10 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityId(discussPost.getId());
 
         eventProducer.fireEvent(event);
+
+        // 计算帖子分数
+        String postScoreKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postScoreKey, discussPost.getId());
         return CommunityUtil.getJSONString(0, "发布成功");
 
     }
@@ -204,6 +213,11 @@ public class DiscussPostController implements CommunityConstant {
                 .setEntityType(ENTITY_TYPE_POST)
                 .setEntityType(id);
         eventProducer.fireEvent(event);
+
+        // 计算帖子分数
+        String postScoreKey = RedisKeyUtil.getPostScoreKey();
+        redisTemplate.opsForSet().add(postScoreKey, id);
+
         return CommunityUtil.getJSONString(0);
     }
 

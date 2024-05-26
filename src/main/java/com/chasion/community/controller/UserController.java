@@ -205,7 +205,7 @@ public class UserController {
         page.setLimit(10);
         page.setPath("/user/discussPost" + userId);
         // 查找某人发布过的帖子
-        List<DiscussPost> postList = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit());
+        List<DiscussPost> postList = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit(), 0);
         // 封装volist
         ArrayList<HashMap<String, Object>> list = new ArrayList<>();
         if (!postList.isEmpty()){

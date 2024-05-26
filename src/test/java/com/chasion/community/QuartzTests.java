@@ -17,6 +17,11 @@ public class QuartzTests {
 
     @Test
     public void testDeleteJob() throws SchedulerException {
+        System.out.println(scheduler.deleteJob(new JobKey("postScoreRefreshJob", "communityJobGroup")));
+    }
+
+    @Test
+    public void testDeleteAlphaJob() throws SchedulerException {
         System.out.println(scheduler.deleteJob(new JobKey("alphaJob", "alphaJobGroup")));
     }
 }
