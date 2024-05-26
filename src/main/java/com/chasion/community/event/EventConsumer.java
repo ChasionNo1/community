@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -37,6 +38,12 @@ public class EventConsumer implements CommunityConstant {
 
 //    @Value("${spring.kafka.consumer.group-id}")
 //    private String groupId;
+
+    @Value("${wk.image.storage}")
+    private String storage;
+
+    @Value("${wk.image.command}")
+    private String command;
 
     @KafkaListener(topics = {TOPIC_COMMENT, TOPIC_LIKE, TOPIC_FOLLOW}, groupId = "community-consumer-group")
     public void handleCommentMessage(ConsumerRecord record){
@@ -106,5 +113,33 @@ public class EventConsumer implements CommunityConstant {
         }
         elasticsearchService.deleteDiscussPost(event.getEntityId());
     }
+
+
+    @KafkaListener(topics = {TOPIC_SHARE}, groupId = "community-consumer-group")
+    public void handleShareMessage(ConsumerRecord record){
+        if (record == null || record.value() == null) {
+            logger.error("Received null record");
+            return;
+        }
+        Event event = JSONObject.parseObject(record.value().toString(), Event.class);
+        if (event == null) {
+            logger.error("Received format error");
+            return;
+        }
+
+        String htmlUrl = (String) event.getData().get("htmlUrl");
+        String fileName = (String) event.getData().get("fileName");
+        String suffix = (String) event.getData().get("suffix");
+
+        // 拼接路径
+        String cmd = command + " --quality 75 " + htmlUrl + " " + storage + "/" + fileName + suffix;
+        try {
+            Runtime.getRuntime().exec(cmd);
+            logger.info("生成长图成功：" + cmd);
+        } catch (IOException e) {
+            logger.error("生成长图失败：" + e.getMessage());
+        }
+    }
+
 
 }

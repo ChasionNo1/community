@@ -37,4 +37,7 @@ public interface CommunityConstant {
 
     // 主题：删除帖子
     String TOPIC_DELETE = "delete";
+
+    // 主题：分享
+    String TOPIC_SHARE = "share";
 }
