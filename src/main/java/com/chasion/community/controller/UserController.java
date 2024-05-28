@@ -9,6 +9,8 @@ import com.chasion.community.service.*;
 import com.chasion.community.util.CommunityConstant;
 import com.chasion.community.util.CommunityUtil;
 import com.chasion.community.util.HostHolder;
+import com.qiniu.util.Auth;
+import com.qiniu.util.StringMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,15 +58,51 @@ public class UserController {
     @Autowired
     private CommentService commentService;
 
+    @Value("${qiniu.key.access}")
+    private String accessKey;
+
+    @Value("${qiniu.key.secret}")
+    private String secretKey;
+
+    @Value("${qiniu.bucket.header.name}")
+    private String headerBucketName;
+
+    @Value("${qiniu.bucket.header.url}")
+    private String headerBucketUrl;
+
     // 响应设置页面
     @LoginRequired
     @RequestMapping(path = "/user/setting", method = RequestMethod.GET)
     public String getSettingPage(Model model) {
+        // 上传文件名称
+        String fileName = CommunityUtil.generateUUID();
+        // 设置响应信息
+        StringMap policy = new StringMap();
+        policy.put("returnBody", CommunityUtil.getJSONString(0));
+        // 生成上传凭证，让服务器识别，客户端上传
+        Auth auth = Auth.create(accessKey, secretKey);
+        String uploadToken = auth.uploadToken(headerBucketName, fileName, 3600, policy);
+        model.addAttribute("uploadToken", uploadToken);
+        model.addAttribute("fileName", fileName);
         return "/site/setting";
+    }
+
+    // 更新头像的路径
+    @RequestMapping(path = "/user/header/url", method = RequestMethod.POST)
+    @ResponseBody
+    public String uploadHeaderUrl(String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            return CommunityUtil.getJSONString(1, "文件名不能为空");
+        }
+
+        String url = headerBucketUrl + "/" + fileName;
+        userService.updateHeader(hostHolder.getUser().getId(), url);
+        return CommunityUtil.getJSONString(0);
     }
 
 
     // 上传文件
+    // 改用云服务器的对象存储，此方法废弃
     @LoginRequired
     @RequestMapping(value = "/user/upload", method = RequestMethod.POST)
     public String upload(@RequestParam("headerImage") MultipartFile headerImage, Model model) {
@@ -105,6 +143,7 @@ public class UserController {
     }
 
     // 获取头像
+    // 改为云服务器对象存储，此方法废弃
     @RequestMapping(path = "/user/header/{filename}", method = RequestMethod.GET)
     public void getHeader(@PathVariable String filename, HttpServletResponse response) {
         // 找到服务器存放的路径

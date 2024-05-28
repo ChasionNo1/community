@@ -37,6 +37,9 @@ public class ShareController {
     @Value("${wk.image.storage}")
     private String storage;
 
+    @Value("${qiniu.bucket.share.url}")
+    private String shareUrl;
+
     @RequestMapping(path = "/share", method = RequestMethod.GET)
     @ResponseBody
     public String share(String htmlUrl) {
@@ -52,13 +55,16 @@ public class ShareController {
                 ;
         eventProducer.fireEvent(event);
         HashMap<String, Object> map = new HashMap<>();
-        map.put("shareUrl", domain + "/share/image/" + fileName);
+//        map.put("shareUrl", domain + "/share/image/" + fileName);
         // 返回访问路径
+        // 云服务器路径
+        map.put("shareUrl", shareUrl + "/" + fileName);
         return CommunityUtil.getJSONString(0, null, map);
 
     }
-
-    // 生成长图
+    // 废弃
+    // 生成长图，从本地获取图片
+    // 改为从云服务器获取，在consumer中获取，仍然需要执行cmd命令生成长图在本地，不过是服务器把它又存储到oos中
     @RequestMapping(path = "/share/image/{fileName}", method = RequestMethod.GET)
     public void getShareImage(@PathVariable("fileName") String fileName, HttpServletResponse response) {
         if (StringUtils.isBlank(fileName)){
@@ -80,4 +86,5 @@ public class ShareController {
         }
 
     }
+
 }
