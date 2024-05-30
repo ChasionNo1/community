@@ -30,6 +30,11 @@ public class HomeController {
     @Autowired
     private LikeService likeService;
 
+    @RequestMapping(value = "/", method = RequestMethod.GET)
+    public String root(Model model) {
+        return "forward:/index";
+    }
+
 
     @RequestMapping(path = "/index", method = RequestMethod.GET)
     public String getIndexPage(Model model, Page page, @RequestParam(name = "orderMode", defaultValue = "0") int orderMode){

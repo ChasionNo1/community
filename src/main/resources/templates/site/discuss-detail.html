@@ -83,7 +83,9 @@
 						<img th:src="${user.headerUrl}" class="align-self-start mr-4 rounded-circle user-header" alt="用户头像" >
 					</a>
 					<div class="media-body">
-						<div class="mt-0 text-warning" th:utext="${user.username}">寒江雪</div>
+						<div class="mt-0 text-warning" >
+							<a th:utext="${user.username}" th:href="@{|/user/profile/${user.id}|}">寒江雪</a>
+						</div>
 						<div class="text-muted mt-3">
 							发布于 <b th:utext="${#dates.format(post.createTime, 'yyyy-MM-dd HH:mm:ss')}">2019-04-15 15:32:18</b>
 							<ul class="d-inline float-right">
@@ -126,7 +128,7 @@
 						</a>
 						<div class="media-body">
 							<div class="mt-0">
-								<span class="font-size-12 text-success" th:utext="${cvo.user.username}">掉脑袋切切</span>
+								<a class="font-size-12 text-success" th:utext="${cvo.user.username}" th:href="@{|/user/profile/${cvo.user.id}|}">掉脑袋切切</a>
 								<span class="badge badge-secondary float-right floor">
 									<i th:text="${page.offset + cvoStat.count}">1</i>#
 								</span>
@@ -153,10 +155,10 @@
 								<!-- 第1条回复 -->
 								<li class="pb-3 pt-3 mb-3 border-bottom" th:each="rvo:${cvo.replies}">
 									<div>
-										<span th:if="${rvo.target==null}"><b class="text-info" th:utext="${rvo.user.username}">寒江雪</b>:&nbsp;&nbsp;</span>
+										<span th:if="${rvo.target==null}"><a class="text-info" th:utext="${rvo.user.username}" th:href="@{|/user/profile/${rvo.user.id}|}">寒江雪</a>:&nbsp;&nbsp;</span>
 										<span th:if="${rvo.target!=null}">
-											<i class="text-info" th:utext="${rvo.user.username}">xixi</i> 回复
-											<b class="text-info" th:utext="${rvo.target.username}">hh</b>
+											<i class="text-info" th:utext="${rvo.user.username}" th:href="@{|/user/profile/${rvo.user.id}|}">xixi</i> 回复
+											<a class="text-info" th:utext="${rvo.target.username}" th:href="@{|/user/profile/${rvo.target.id}|}">hh</a>
 										</span>
 										<span th:utext="${rvo.reply.content}">这个是直播时间哈，觉得晚的话可以直接看之前的完整录播的~</span>
 									</div>

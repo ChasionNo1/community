@@ -75,7 +75,7 @@ public class LoginController implements CommunityConstant {
     }
     // 激活链接请求
     @RequestMapping(path = "/activation/{userId}/{code}", method = RequestMethod.GET)
-    public String actvation(Model model, @PathVariable("userId") int userId, @PathVariable("code") String code) {
+    public String activation(Model model, @PathVariable("userId") int userId, @PathVariable("code") String code) {
         int activationState = userService.activation(userId, code);
         if (activationState == REGISTER_SUCCESS){
             model.addAttribute("msg", "激活成功，您的账号可以正常使用了!");
